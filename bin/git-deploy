@@ -1,0 +1,30 @@
+#!/bin/bash
+# http://github.com/petrkle/git-deploy
+
+export PAGER=cat
+export LFS='
+'
+
+CONFDIR=.deploy
+ONSERVER=$CONFDIR/deployed.version
+PID=$$
+
+[ "$1" = "" ] && VERSION="HEAD" || VERSION=$1
+
+[ -d $CONFDIR ] || mkdir $CONFDIR
+[ -f $ONSERVER ] || git rev-parse HEAD > $ONSERVER
+[ -f $CONFDIR/ftp.username ] || echo "yourusername" > $CONFDIR/ftp.username
+[ -f $CONFDIR/ftp.host ] || echo "ftp://example.com" > $CONFDIR/ftp.host
+
+[ -f .git/info/exclude ] || echo "Run `basename $0` in top level of git repository." && exit 1
+grep $CONFDIR .git/info/exclude -q -s &>/dev/null || echo $CONFDIR >> .git/info/exclude
+
+git diff --name-status `cat $ONSERVER` $VERSION | sed "s/^[MA]\s/mput -dc /;s/^[D]\s/rm -rf /" > $CONFDIR/tmp.$PID.diff
+
+if [ -s $CONFDIR/tmp.$PID.diff ] ; then
+	echo "open -u `cat $CONFDIR/ftp.username` `cat $CONFDIR/ftp.host`" > $CONFDIR/tmp.$PID.pre
+	cat $CONFDIR/tmp.$PID.pre $CONFDIR/tmp.$PID.diff > $CONFDIR/tmp.$PID.upload
+	lftp -f $CONFDIR/tmp.$PID.upload && git rev-parse $VERSION > $ONSERVER
+fi
+
+rm $CONFDIR/tmp.$PID.*
