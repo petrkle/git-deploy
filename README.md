@@ -54,6 +54,6 @@ It's not properly tested yet :^)
 Similar projects
 ================
 
-https://github.com/aizatto/git-deploy
-https://github.com/ezyang/git-ftp
-https://github.com/resmo/git-ftp
+* https://github.com/aizatto/git-deploy
+* https://github.com/ezyang/git-ftp
+* https://github.com/resmo/git-ftp
