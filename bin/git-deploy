@@ -5,11 +5,17 @@ export PAGER=cat
 export LFS='
 '
 
+exit
+
 CONFDIR=.deploy
 ONSERVER=$CONFDIR/deployed.version
 PID=$$
 
-[ "$1" = "" ] && VERSION="HEAD" || VERSION=$1
+if [ "$1" = "" ] ; then
+	VERSION="HEAD"
+else
+	VERSION=$1
+fi
 
 [ -d $CONFDIR ] || mkdir $CONFDIR
 [ -f $ONSERVER ] || git rev-parse HEAD > $ONSERVER
