@@ -5,8 +5,6 @@ export PAGER=cat
 export LFS='
 '
 
-exit
-
 CONFDIR=.deploy
 ONSERVER=$CONFDIR/deployed.version
 PID=$$
@@ -22,10 +20,14 @@ fi
 [ -f $CONFDIR/ftp.username ] || echo "yourusername" > $CONFDIR/ftp.username
 [ -f $CONFDIR/ftp.host ] || echo "ftp://example.com" > $CONFDIR/ftp.host
 
-[ -f .git/info/exclude ] || echo "Run `basename $0` in top level of git repository." && exit 1
+if [ ! -f .git/info/exclude ] ; then
+	echo "Run `basename $0` in top level of git repository."
+	exit 1
+fi
+
 grep $CONFDIR .git/info/exclude -q -s &>/dev/null || echo $CONFDIR >> .git/info/exclude
 
-git diff --name-status `cat $ONSERVER` $VERSION | sed "s/^[MA]\s/mput -dc /;s/^[D]\s/rm -rf /" > $CONFDIR/tmp.$PID.diff
+git diff --name-status `cat $ONSERVER` $VERSION | sed "s/^[MA]\s/mput -d /;s/^[D]\s/rm -rf /" > $CONFDIR/tmp.$PID.diff
 
 if [ -s $CONFDIR/tmp.$PID.diff ] ; then
 	echo "open -u `cat $CONFDIR/ftp.username` `cat $CONFDIR/ftp.host`" > $CONFDIR/tmp.$PID.pre
